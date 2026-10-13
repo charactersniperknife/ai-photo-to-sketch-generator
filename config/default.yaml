@@ -1,0 +1,47 @@
+# Default runtime configuration for ai-photo-to-sketch-generator.
+# Override any key by dropping a config/local.yaml next to this file.
+
+app:
+  name: "SketchForge"
+  version: "0.4.2"
+  output_dir: "outputs"
+  max_dimension: 4096          # downscale inputs larger than this on the long edge
+  preserve_exif: false
+
+pipeline:
+  # Order matters. Each stage is a callable resolved from sketchforge.pipeline.
+  stages:
+    - normalise
+    - denoise
+    - edge_extract
+    - line_refine
+    - tone_map
+  worker_threads: 4            # batch conversions only; single-image runs use 1
+
+styles:
+  pencil:
+    enabled: true
+    line_strength: 0.72
+    hatch_density: 3
+    soften_radius: 1.4
+  ink:
+    enabled: true
+    threshold: 0.45
+    stroke_weight: 1.8
+  charcoal:
+    enabled: true
+    grain: 0.35
+    contrast_gamma: 1.15
+  crosshatch:
+    enabled: false            # experimental, off by default
+
+model:
+  backend: "onnx"              # onnx | torch | none
+  checkpoint: "models/checkpoints/line_refine_v3.onnx"
+  device: "cpu"                # cpu | cuda (requires the [gpu] extra)
+  input_size: 512
+
+io:
+  formats: ["png", "jpg", "jpeg", "webp", "bmp", "tiff"]
+  jpeg_quality: 95
+  strip_metadata: true
